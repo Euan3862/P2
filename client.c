@@ -13,7 +13,7 @@ void connectToServer()
 
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(9001);
-    server_address.sin_addr.s_addr = INADDR_ANY;
+    server_address.sin_addr.s_addr = inet_addr("127.0.0.1");
 
     int status = connect(client_socket, (struct sockaddr*) &server_address, sizeof(server_address));
 
@@ -27,11 +27,11 @@ void connectToServer()
     {
         while (1){
             char message[255]; // Reserve space for 1024 bytes, contiguously stored in memory.        
-              memset(message, 0, sizeof(message));
-            scanf("%s", message);
-            send(client_socket, message, sizeof(message), 0);
+            // memset(message, 0, sizeof(message));
+            scanf("%254s", message);
+            send(client_socket, message, strlen(message), 0);
 
-            int bytes = recv(client_socket, message, sizeof(message) - 1, 0);
+            int bytes = recv(client_socket, message, strlen(message) - 1, 0);
             if (bytes <= 0){
                 break;
             }

@@ -22,15 +22,15 @@ void clientConnection()
     while (1)
     {
         char msg[255];
-        memset(msg, 0, sizeof(msg));
+        // memset(msg, 0, sizeof(msg));
 
-        int bytes = recv(client_socket, msg, sizeof(msg) - 1, 0);
+        int bytes = recv(client_socket, msg, strlen(msg) - 1, 0);
         if (bytes <= 0){
             //Connection lost
             break;
         }
         msg[bytes] = '\0';
-        send(client_socket, msg, sizeof(msg), 0);
+        send(client_socket, msg, strlen(msg), 0);
     }
 }
 
