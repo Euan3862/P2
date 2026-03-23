@@ -1,0 +1,9 @@
+gcc -Wall -Wextra server.c client.c parse_config.c -o server
+
+wget https://www.openssl.org/source/openssl-3.3.6.tar.gz
+tar xf openssl-3.3.6.tar.gz
+cd openssl-3.3.6
+
+./Configure --prefix="$HOME/.local/openssl" --openssldir="$HOME/.local/openssl"
+make
+make install
