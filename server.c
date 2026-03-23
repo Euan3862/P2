@@ -18,20 +18,34 @@ void clientConnection()
     listen(server_socket, 1);
 
     int client_socket = accept(server_socket, NULL, NULL); // Client socket for this specific client
+    int BUFFER_SIZE = 1024;
+    char buffer[BUFFER_SIZE];
 
     while (1)
     {
-        char msg[255];
-        // memset(msg, 0, sizeof(msg));
+     ssize_t bytes_received = recv(client_socket, buffer, sizeof(buffer) - 1, 0);
+     if (bytes_received < 0) {
+    
+     }
+     if (bytes_received == 0){
+        printf("Client Disconnected");
+        break;
+     }
 
-        int bytes = recv(client_socket, msg, strlen(msg) - 1, 0);
-        if (bytes <= 0){
-            //Connection lost
-            break;
+     buffer[bytes_received] = '\0';
+     printf("Received :%s", buffer);
+
+     ssize_t total_sent = 0;
+     while (total_sent < bytes_received) {
+        ssize_t bytes_sent = send(client_socket, buffer + total_sent, bytes_received - total_sent, 0);
+        
+        if (bytes_sent < 0) {
+     
         }
-        msg[bytes] = '\0';
-        send(client_socket, msg, strlen(msg), 0);
+        total_sent += bytes_sent;
+     }
     }
+    
 }
 
 //https://www.geeksforgeeks.org/computer-networks/simple-client-server-application-in-c/

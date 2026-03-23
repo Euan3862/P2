@@ -16,6 +16,7 @@ void connectToServer()
     server_address.sin_addr.s_addr = inet_addr("127.0.0.1");
 
     int status = connect(client_socket, (struct sockaddr*) &server_address, sizeof(server_address));
+    char buffer[1024];
 
     if (status == -1)
     {
@@ -25,20 +26,41 @@ void connectToServer()
 
     else
     {
-        while (1){
-            char message[255]; // Reserve space for 1024 bytes, contiguously stored in memory.        
-            // memset(message, 0, sizeof(message));
-            scanf("%254s", message);
-            send(client_socket, message, strlen(message), 0);
+        while (1){     
+            printf("Enter message:\n");
+            fflush(stdout);
+            
+        if (fgets(buffer, sizeof(buffer), stdin) == NULL)
+        {
+            break;
+        }
 
-            int bytes = recv(client_socket, message, strlen(message) - 1, 0);
-            if (bytes <= 0){
-                break;
+        ssize_t len = strlen(buffer);
+        if (len == 0){
+            continue;
+        }
+
+        ssize_t total_sent = 0;
+        while (total_sent < len) {
+            ssize_t bytes_sent = send(client_socket, buffer + total_sent, len -total_sent, 0);
+            if (bytes_sent < 0) {
+  
             }
+            total_sent += bytes_sent;
+        }
 
-            message[bytes] = '\0';
-            printf("%s\n", message);
-          
+        ssize_t bytes_received = recv(client_socket, buffer, sizeof(buffer) - 1, 0);
+        if (bytes_received < 0) {
+   
+        }
+        if (bytes_received == 0) {
+            printf("Server closed the connection\n");
+            break;
+        }
+
+        buffer[bytes_received] = '\0';
+        printf("Echo from server: %s", buffer);
+
         }
     }
 }
