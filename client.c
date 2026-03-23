@@ -5,7 +5,7 @@
 #include <sys/socket.h> //for socket APIs
 #include <sys/types.h>
 
-int main(int argc, char const* argv[])
+void connectToServer()
 {
     int client_socket = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -15,21 +15,29 @@ int main(int argc, char const* argv[])
     server_address.sin_port = htons(9001);
     server_address.sin_addr.s_addr = INADDR_ANY;
 
-    int server_socket = connect(client_socket, (struct sockaddr*) &server_address, sizeof(server_address));
+    int status = connect(client_socket, (struct sockaddr*) &server_address, sizeof(server_address));
 
-    if (server_socket == -1)
+    if (status == -1)
     {
-        printf("Error...\n");
+        perror("Error...\n");
+        return;
     }
+
     else
     {
-  
-        char message[255];
-        scanf("%s", message);
-
-        send(server_socket, message, sizeof(message), 0);
-
+        while (1){
+            char message[255]; // Reserve space for 1024 bytes, contiguously stored in memory.        
+            scanf("%s", message);
+            send(client_socket, message, sizeof(message), 0);
+            recv(client_socket, message, sizeof(message), 0);
+            printf("%s\n", message);
+            memset(message, 0, sizeof(message));
+        }
     }
+}
 
-   return 0;
+int main(int argc, char const* argv[])
+{
+    connectToServer();
+    return 0;
 }
