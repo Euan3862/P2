@@ -27,11 +27,18 @@ void connectToServer()
     {
         while (1){
             char message[255]; // Reserve space for 1024 bytes, contiguously stored in memory.        
+              memset(message, 0, sizeof(message));
             scanf("%s", message);
             send(client_socket, message, sizeof(message), 0);
-            recv(client_socket, message, sizeof(message), 0);
+
+            int bytes = recv(client_socket, message, sizeof(message) - 1, 0);
+            if (bytes <= 0){
+                break;
+            }
+
+            message[bytes] = '\0';
             printf("%s\n", message);
-            memset(message, 0, sizeof(message));
+          
         }
     }
 }
