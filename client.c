@@ -27,39 +27,36 @@ void connectToServer()
     else
     {
         while (1){     
-            printf("Enter message:\n");
+            printf("Enter message: ");
             fflush(stdout);
-            
-        if (fgets(buffer, sizeof(buffer), stdin) == NULL)
-        {
-            break;
-        }
 
-        ssize_t len = strlen(buffer);
-        if (len == 0){
-            continue;
-        }
-
-        ssize_t total_sent = 0;
-        while (total_sent < len) {
-            ssize_t bytes_sent = send(client_socket, buffer + total_sent, len -total_sent, 0);
-            if (bytes_sent < 0) {
-  
+            if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
+                break;
             }
-            total_sent += bytes_sent;
-        }
+            ssize_t len = strlen(buffer);
+            if (len == 0){
+                continue;
+            }
 
-        ssize_t bytes_received = recv(client_socket, buffer, sizeof(buffer) - 1, 0);
-        if (bytes_received < 0) {
-   
-        }
-        if (bytes_received == 0) {
-            printf("Server closed the connection\n");
-            break;
-        }
+            ssize_t total_sent = 0;
+            while (total_sent < len) {
+                ssize_t bytes_sent = send(client_socket, buffer + total_sent, len - total_sent, 0);
+                total_sent += bytes_sent;
+            }
 
-        buffer[bytes_received] = '\0';
-        printf("Echo from server: %s", buffer);
+            ssize_t bytes_received = recv(client_socket, buffer, sizeof(buffer) - 1, 0);
+
+            if (bytes_received == 0) {
+                printf("Server closed the connection\n");
+                break;
+            }
+
+            buffer[bytes_received] = '\0';
+            printf("Echo from server: %s", buffer);
+            printf(buffer);
+            if (strcmp(buffer, "exit\n") == 0){
+                break;
+            }
 
         }
     }

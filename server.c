@@ -23,6 +23,7 @@ void clientConnection()
 
     while (1)
     {
+        
      ssize_t bytes_received = recv(client_socket, buffer, sizeof(buffer) - 1, 0);
      if (bytes_received < 0) {
     
@@ -33,15 +34,12 @@ void clientConnection()
      }
 
      buffer[bytes_received] = '\0';
-     printf("Received :%s", buffer);
+     printf("Received: %s", buffer);
 
      ssize_t total_sent = 0;
      while (total_sent < bytes_received) {
         ssize_t bytes_sent = send(client_socket, buffer + total_sent, bytes_received - total_sent, 0);
         
-        if (bytes_sent < 0) {
-     
-        }
         total_sent += bytes_sent;
      }
     }
