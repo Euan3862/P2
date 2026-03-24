@@ -25,11 +25,10 @@ int connectToServer()
 
     int status = connect(client_socket, (struct sockaddr*) &server_address, sizeof(server_address));
 
-
     if (status == -1)
     {
         perror("Error...\n");
-        return;
+        return 1;
     }
     return client_socket;
 }
@@ -88,6 +87,9 @@ void client_logic(int client_socket)
 int main(int argc, char const* argv[])
 {
     int client_socket = connectToServer();
+    if (client_socket == 1) {
+        exit(1);
+    }
     client_logic(client_socket);
     return 0;
 }

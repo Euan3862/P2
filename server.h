@@ -1,9 +1,4 @@
-struct clientSession
-{
-    int socket_fd;
-    char alias[64];
-    int authenticated;
-};
+#include <pthread.h>
 
 enum states {
     unauthorised,
@@ -14,5 +9,17 @@ enum states {
     create_new_3
 };
 
+struct clientSession
+{
+    int socket_fd;
+    char alias[64];
+    enum states current_state;
+    int in_use;
+    pthread_t thread_id;
+
+};
+
+
 #define MAX_CLIENTS 64
+pthread_mutex_t clients_mutex = PTHREAD_MUTEX_INITIALIZER;
 struct clientSession clients[MAX_CLIENTS];

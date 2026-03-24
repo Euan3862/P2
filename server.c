@@ -7,27 +7,10 @@
 #include "server.h"
 #include "parse_config.h"
 
-int client_count;
+int client_id, client_count;
 enum states current_state = unauthorised;
 
-/**
- * Initial Client connection to the server
- */
-int client_connection()
-{
-    int server_socket = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in server_address;
 
-    server_address.sin_family = AF_INET; // AF_INET = TCP
-    server_address.sin_port = htons(9000);
-    server_address.sin_addr.s_addr = INADDR_ANY;
-
-    bind(server_socket, (struct sockaddr*)&server_address, sizeof(server_address));
-    listen(server_socket, 1);
-
-    int client_socket = accept(server_socket, NULL, NULL); // Client socket for this specific client
-    return client_socket;
-}
 
 /**
  * Dealing with the core server logic, and possible client branches ie, logging in or creating a new account.
@@ -104,10 +87,75 @@ void server_logic(int client_socket)
     }
 }
 
+
+/**
+ * Initial Client connection to the server
+ */
+int client_connection()
+{
+    int server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    struct sockaddr_in server_address;
+
+    server_address.sin_family = AF_INET; // AF_INET = TCP
+    server_address.sin_port = htons(9000);
+    server_address.sin_addr.s_addr = INADDR_ANY;
+
+    bind(server_socket, (struct sockaddr*)&server_address, sizeof(server_address));
+    listen(server_socket, 1);
+
+    while (1)
+    {
+        int client_socket = accept(server_socket, NULL, NULL); // Client socket for this specific client
+        if (client_socket < 0) {
+            perror("accept");
+            continue;
+        }
+
+        pthread_mutex_lock(&clients_mutex);
+
+        int slot = -1;
+        for (int i = 0; i < MAX_CLIENTS; i++) {
+            if (!clients[i].in_use) {
+                slot = i;
+                break;
+            }
+        }
+
+        if (slot == -1) {
+            pthread_mutex_unlock(&clients_mutex);
+            close(client_socket);
+            continue;
+        }
+
+        clients[slot].socket_fd = client_socket;
+        clients[slot].current_state = unauthorised;
+        clients[slot].in_use = 1;
+        clients[slot].alias[0] = '\0';
+
+        pthread_mutex_unlock(&clients_mutex);
+
+        if (pthread_create(&clients[slot].thread_id, NULL, server_logic, &clients[slot]) != 0) {
+            perror("pthread_create");
+
+            pthread_mutex_lock(&clients_mutex);
+            clients[slot].in_use = 0;
+            pthread_mutex_unlock(&clients_mutex);
+            close(client_socket);
+            continue;
+        }
+
+        pthread_detach(clients[slot].thread_id);
+
+        
+    }
+
+}
+
+
 //https://www.geeksforgeeks.org/computer-networks/simple-client-server-application-in-c/
 int main(int argc, char const* argv[])
 {   
-    client_count = get_client_count();
+    client_id, client_count = get_client_count();
     printf("CC: %d\n", client_count);
     int client_socket = client_connection();
     server_logic(client_socket);
