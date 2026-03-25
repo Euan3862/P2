@@ -6,7 +6,9 @@ enum states {
     login_attempt,
     create_new_1,
     create_new_2,
-    create_new_3
+    create_new_3,
+    disconnect,
+    hub
 };
 
 struct clientSession
@@ -21,5 +23,6 @@ struct clientSession
 
 
 #define MAX_CLIENTS 64
-pthread_mutex_t clients_mutex = PTHREAD_MUTEX_INITIALIZER;
+#define BUFFER_SIZE 1024
+//pthread_mutex_t clients_mutex = PTHREAD_MUTEX_INITIALIZER;
 struct clientSession clients[MAX_CLIENTS];
